@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<h1>Nova Tarefa</h1>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label for="titulo">Título:</label><br>
+    <input type="text" id="titulo" name="titulo" required><br><br>
+
+    <label for="descricao">Descrição:</label><br>
+    <textarea id="descricao" name="descricao"></textarea><br><br>
+
+    <label>
+        <input type="checkbox" name="concluida">
+        Concluída
+    </label><br><br>
+
+    <button type="submit">Salvar</button>
+</form>
+
+<br>
+<a href="{% url 'listar_tarefas' %}">Voltar</a>
+    
+    
+</body>
+</html>

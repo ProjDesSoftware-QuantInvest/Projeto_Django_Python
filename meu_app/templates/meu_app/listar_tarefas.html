@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<h1>Lista de Tarefas</h1>
+
+<a href="{% url 'criar_tarefa' %}">Nova tarefa</a>
+
+<hr>
+
+<form method="get">
+    <input
+        type="text"
+        name="busca"
+        placeholder="Buscar por título"
+        value="{{ busca|default:'' }}"
+    >
+
+    <select name="status">
+        <option value="todas" {% if status == 'todas' or not status %}selected{% endif %}>
+            Todas
+        </option>
+        <option value="pendentes" {% if status == 'pendentes' %}selected{% endif %}>
+            Pendentes
+        </option>
+        <option value="concluidas" {% if status == 'concluidas' %}selected{% endif %}>
+            Concluídas
+        </option>
+    </select>
+
+    <select name="ordem">
+        <option value="recentes" {% if ordem == 'recentes' or not ordem %}selected{% endif %}>
+            Mais recentes
+        </option>
+        <option value="antigas" {% if ordem == 'antigas' %}selected{% endif %}>
+            Mais antigas
+        </option>
+        <option value="titulo_az" {% if ordem == 'titulo_az' %}selected{% endif %}>
+            Título A-Z
+        </option>
+        <option value="titulo_za" {% if ordem == 'titulo_za' %}selected{% endif %}>
+            Título Z-A
+        </option>
+    </select>
+
+    <button type="submit">Aplicar</button>
+</form>
+
+<a href="{% url 'listar_tarefas' %}">Limpar filtros</a>
+  
+{% for tarefa in tarefas %}
+    <h2>{{ tarefa.titulo }}</h2>
+
+    <p>{{ tarefa.descricao }}</p>
+
+    {% if tarefa.concluida %}
+        <p>Status: concluída</p>
+    {% else %}
+        <p>Status: pendente</p>
+    {% endif %}
+
+    <p>Criada em: {{ tarefa.data_criacao }}</p>
+
+    <a href="{% url 'detalhe_tarefa' tarefa.id %}">Ver detalhes</a>
+    <a href="{% url 'editar_tarefa' tarefa.id %}">Editar</a>
+    <a href="{% url 'excluir_tarefa' tarefa.id %}">Excluir</a>
+
+    <hr>
+{% empty %}
+    <p>Nenhuma tarefa encontrada.</p>
+{% endfor %}
+
+
+
+</body>
+</html>

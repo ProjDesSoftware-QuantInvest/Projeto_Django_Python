@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Detalhes da Tarefa</h1>
+
+<h2>{{ tarefa.titulo }}</h2>
+
+<p>
+    <strong>Descrição:</strong>
+    {{ tarefa.descricao }}
+</p>
+
+<p>
+    <strong>Status:</strong>
+    {% if tarefa.concluida %}
+        Concluída
+    {% else %}
+        Pendente
+    {% endif %}
+</p>
+
+<p>
+    <strong>Data de criação:</strong>
+    {{ tarefa.data_criacao }}
+</p>
+
+<a href="{% url 'editar_tarefa' tarefa.id %}">Editar</a>
+<a href="{% url 'excluir_tarefa' tarefa.id %}">Excluir</a>
+<a href="{% url 'listar_tarefas' %}">Voltar</a>
+    
+</body>
+</html>
+
