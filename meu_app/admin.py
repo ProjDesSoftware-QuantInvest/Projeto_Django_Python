@@ -1,13 +1,14 @@
 
-# Register your models here.
-
 from django.contrib import admin
-from .models import Produto 
-from .models import Tarefa, Categoria
-# Importe seu Model
+from .models import Produto, Categoria, Tarefa, ClasseAtivo, Corretora, Ativo, Transacao
 
-# Registre seu Model aqui
+# Registrando os modelos originais
 admin.site.register(Produto)
 admin.site.register(Tarefa)
 admin.site.register(Categoria)
 
+# Registrando os novos modelos de Investimentos
+admin.site.register(ClasseAtivo)
+admin.site.register(Corretora)
+admin.site.register(Ativo)
+admin.site.register(Transacao)
