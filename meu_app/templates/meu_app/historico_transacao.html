@@ -4,14 +4,24 @@
     <meta charset="UTF-8">
     <title>Histórico de Transações</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f8f9fa; }
-        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        /* Fundo escuro e texto claro */
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #121212; color: #e0e0e0; }
+        .container { max-width: 1000px; margin: 0 auto; background: #1e1e1e; padding: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        
+        h1 { color: #ffffff; }
+        .btn-voltar { display: inline-block; margin-bottom: 15px; padding: 10px 15px; background: #333333; color: #e0e0e0; text-decoration: none; border-radius: 4px; border: 1px solid #444; }
+        .btn-voltar:hover { background: #444444; }
+
+        /* Tabela Dark Mode */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
-        th { background-color: #343a40; color: white; }
-        .compra { background-color: #e6f4ea; color: #137333; font-weight: bold; } 
-        .venda { background-color: #fce8e6; color: #c5221f; font-weight: bold; } 
-        .btn-voltar { display: inline-block; margin-bottom: 15px; padding: 10px 15px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333333; }
+        th { background-color: #2a2a2a; color: #ffffff; text-transform: uppercase; font-size: 13px; }
+        tr:hover { background-color: #252525; }
+
+        /* Badges de Compra e Venda */
+        .badge { padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 12px; display: inline-block; text-align: center; }
+        .compra { background-color: rgba(40, 167, 69, 0.15); color: #4ade80; border: 1px solid rgba(40, 167, 69, 0.3); } 
+        .venda { background-color: rgba(220, 53, 69, 0.15); color: #f87171; border: 1px solid rgba(220, 53, 69, 0.3); } 
     </style>
 </head>
 <body>
@@ -26,7 +36,7 @@
                 <th>Tipo</th>
                 <th>Ativo</th>
                 <th>Quantidade</th>
-                <th>Preço Unitário (R$)</th>
+                <th>Preço Unitário</th>
                 <th>Corretora</th>
             </tr>
         </thead>
@@ -34,17 +44,19 @@
             {% for t in transacoes %}
             <tr>
                 <td>{{ t.data_transacao|date:"d/m/Y" }}</td>
-                <td class="{% if t.tipo == 'C' %}compra{% else %}venda{% endif %}">
-                    {% if t.tipo == 'C' %}COMPRA{% else %}VENDA{% endif %}
+                <td>
+                    <span class="badge {% if t.tipo == 'C' %}compra{% else %}venda{% endif %}">
+                        {% if t.tipo == 'C' %}COMPRA{% else %}VENDA{% endif %}
+                    </span>
                 </td>
-                <td><strong>{{ t.ativo.ticker }}</strong></td>
+                <td><strong style="color: #fff;">{{ t.ativo.ticker }}</strong></td>
                 <td>{{ t.quantidade }}</td>
                 <td>R$ {{ t.preco_unitario }}</td>
                 <td>{{ t.corretora.nome }}</td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" style="text-align: center;">Nenhuma transação registrada ainda.</td>
+                <td colspan="6" style="text-align: center; color: #888;">Nenhuma transação registrada ainda.</td>
             </tr>
             {% endfor %}
         </tbody>
