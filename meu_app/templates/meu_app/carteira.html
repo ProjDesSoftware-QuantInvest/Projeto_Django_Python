@@ -1,146 +1,65 @@
-
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minha Carteira de Investimentos</title>
-    <link rel="stylesheet" href="arquivo_1.css">
+    <title>Minha Carteira</title>
+    <link rel="stylesheet" href="arquivo_1.css"> 
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f8f9fa; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .search-form { margin-bottom: 20px; padding: 15px; background: #e9ecef; border-radius: 5px; }
+        .search-form input[type="text"] { padding: 8px; width: 250px; border: 1px solid #ccc; border-radius: 4px; }
+        .search-form button { padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #343a40; color: white; }
+        .btn-novo { display: inline-block; float: right; padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; }
+    </style>
 </head>
 <body>
 
 <div class="container">
-    <!-- Formulário de busca por Ticker -->
+    <a href="{% url 'transacao_nova' %}" class="btn-novo">+ Nova Transação</a>
+    <a href="{% url 'transacoes_lista' %}" class="btn-novo" style="background: #17a2b8; margin-right: 10px;">Ver Extrato</a>
+    <h1>Resumo da Carteira</h1>
+
     <div class="search-form">
-        <form onsubmit="event.preventDefault(); filtrarTabela();">
+        <form method="GET" action="">
             <label for="buscarTicker">Buscar Ticker:</label>
-            <input type="text" id="buscarTicker" placeholder="Ex: PETR4, ITUB4" onkeyup="filtrarTabela()">
+            <input type="text" id="buscarTicker" name="ticker" placeholder="Ex: PETR4, ITUB4" value="{{ request.GET.ticker }}">
+            <button type="submit">Pesquisar</button>
+            <a href="{% url 'carteira' %}" style="margin-left: 10px; color: #dc3545; text-decoration: none;">Limpar</a>
         </form>
     </div>
 
-    <!-- Tabela da Carteira -->
     <table id="tabelaCarteira">
         <thead>
             <tr>
                 <th>Ticker</th>
                 <th>Classe</th>
-                <th>Quantidade Total Atual</th>
+                <th>Qtd Total Atual</th>
                 <th>Preço Médio</th>
                 <th>Patrimônio Investido</th>
             </tr>
         </thead>
         <tbody>
+            {% for item in ativos_da_carteira %}
             <tr>
-                <td>FIRFNA</td>
-                <td>Ação</td>
-                <td>180</td>
-                <td>R$ 302,50</td>
-                <td class="patrimonio"></td>
+                <td><strong>{{ item.ticker }}</strong></td>
+                <td>{{ item.classe }}</td>
+                <td>{{ item.quantidade_total }}</td>
+                <td>R$ {{ item.preco_medio }}</td>
+                <td>R$ {{ item.patrimonio }}</td>
             </tr>
+            {% empty %}
             <tr>
-                <td>SFDNISB</td>
-                <td>ETF</td>
-                <td>140</td>
-                <td>R$ 380,20</td>
-                <td class="patrimonio"></td>
+                <td colspan="5" style="text-align: center; color: #666;">Nenhum ativo encontrado na sua carteira.</td>
             </tr>
-            <tr>
-                <td>FSFMIDC</td>
-                <td>FII</td>
-                <td>400</td>
-                <td>R$ 198,75</td>
-                <td class="patrimonio"></td>
-            </tr>
-            <tr>
-                <td>FMXRF11</td>
-                <td>Ação</td>
-                <td>210</td>
-                <td>R$ 120,20</td>
-                <td class="patrimonio"></td>
-            </tr>
-            <tr>
-                <td>FNSUJN</td>
-                <td>Ação</td>
-                <td>220</td>
-                <td>R$ 130,20</td>
-                <td class="patrimonio"></td>
-            </tr>
-            <tr>
-                <td>UJRHBF</td>
-                <td>Ação</td>
-                <td>230</td>
-                <td>R$ 110,20</td>
-                <td class="patrimonio"></td>
-            </tr>
-            <tr>
-                <td>UDIUNF</td>
-                <td>FII</td>
-                <td>215</td>
-                <td>R$ 190,40</td>
-                <td class="patrimonio"></td>
-            </tr>
-             <tr>
-                <td>S0DJ0A</td>
-                <td>ação</td>
-                <td>200</td>
-                <td>R$ 180,20</td>
-                <td class="patrimonio"></td>
-            </tr>
-            <tr>
-                <td>IUDY8U</td>
-                <td>ação</td>
-                <td>350</td>
-                <td>R$ 150,20</td>
-                <td class="patrimonio"></td>
-            </tr>
-            <tr>
-                <td>AUDNU8</td>
-                <td>ação</td>
-                <td>280</td>
-                <td>R$ 170,10</td>
-                <td class="patrimonio"></td>
-            </tr>
+            {% endfor %}
         </tbody>
     </table>
 </div>
-
-<script>
-    // Função para calcular Patrimônio (Quantidade x Preço Médio) automaticamente
-    function calcularPatrimonio() {
-        const linhas = document.querySelectorAll("#tabelaCarteira tbody tr");
-        linhas.forEach(linha => {
-            const qtdCell = linha.cells[2].textContent;
-            const pmCell = linha.cells[3].textContent;
-
-            // Limpa o texto para extrair números
-            const qtd = parseFloat(qtdCell);
-            const pm = parseFloat(pmCell.replace("R$", "").replace(".", "").replace(",", ".").trim());
-
-            if (!isNaN(qtd) && !isNaN(pm)) {
-                const total = qtd * pm;
-                linha.querySelector(".patrimonio").textContent = total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            }
-        });
-    }
-
-    // Função de filtro para o campo de busca
-    function filtrarTabela() {
-        const input = document.getElementById("buscarTicker").value.toLowerCase();
-        const linhas = document.querySelectorAll("#tabelaCarteira tbody tr");
-
-        linhas.forEach(linha => {
-            const ticker = linha.cells[0].textContent.toLowerCase();
-            if (ticker.includes(input)) {
-                linha.style.display = "";
-            } else {
-                linha.style.display = "none";
-            }
-        });
-    }
-
-    // Executa o cálculo ao carregar a página
-    window.onload = calcularPatrimonio;
-</script>
 
 </body>
 </html>
