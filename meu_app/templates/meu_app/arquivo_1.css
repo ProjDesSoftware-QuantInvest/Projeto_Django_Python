@@ -1,0 +1,43 @@
+
+  body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            padding: 30px;
+        }
+        .container {
+            max-width: 940px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 9px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .search-form {
+            margin-bottom: 25px;
+        }
+        .search-form label {
+            font-weight: bold;
+            margin-right: 18px;
+        }
+        .search-form input {
+            padding: 8px;
+            width: 200px;
+            border: 1px solid purple;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid aqua;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: grey;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
