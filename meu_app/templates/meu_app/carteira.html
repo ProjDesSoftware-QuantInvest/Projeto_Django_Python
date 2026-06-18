@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Carteira</title>
+    <link rel="stylesheet" href="arquivo_1.css"> 
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f8f9fa; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .search-form { margin-bottom: 20px; padding: 15px; background: #e9ecef; border-radius: 5px; }
+        .search-form input[type="text"] { padding: 8px; width: 250px; border: 1px solid #ccc; border-radius: 4px; }
+        .search-form button { padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #343a40; color: white; }
+        .btn-novo { display: inline-block; float: right; padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="{% url 'transacao_nova' %}" class="btn-novo">+ Nova Transação</a>
+    <a href="{% url 'transacoes_lista' %}" class="btn-novo" style="background: #17a2b8; margin-right: 10px;">Ver Extrato</a>
+    <h1>Resumo da Carteira</h1>
+
+    <div class="search-form">
+        <form method="GET" action="">
+            <label for="buscarTicker">Buscar Ticker:</label>
+            <input type="text" id="buscarTicker" name="ticker" placeholder="Ex: PETR4, ITUB4" value="{{ request.GET.ticker }}">
+            <button type="submit">Pesquisar</button>
+            <a href="{% url 'carteira' %}" style="margin-left: 10px; color: #dc3545; text-decoration: none;">Limpar</a>
+        </form>
+    </div>
+
+    <table id="tabelaCarteira">
+        <thead>
+            <tr>
+                <th>Ticker</th>
+                <th>Classe</th>
+                <th>Qtd Total Atual</th>
+                <th>Preço Médio</th>
+                <th>Patrimônio Investido</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in ativos_da_carteira %}
+            <tr>
+                <td><strong>{{ item.ticker }}</strong></td>
+                <td>{{ item.classe }}</td>
+                <td>{{ item.quantidade_total }}</td>
+                <td>R$ {{ item.preco_medio }}</td>
+                <td>R$ {{ item.patrimonio }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" style="text-align: center; color: #666;">Nenhum ativo encontrado na sua carteira.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>
