@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Histórico de Transações</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f8f9fa; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #343a40; color: white; }
+        .compra { background-color: #e6f4ea; color: #137333; font-weight: bold; } 
+        .venda { background-color: #fce8e6; color: #c5221f; font-weight: bold; } 
+        .btn-voltar { display: inline-block; margin-bottom: 15px; padding: 10px 15px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="{% url 'carteira' %}" class="btn-voltar">← Voltar para Carteira</a>
+    <h1>Extrato de Transações</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Ativo</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário (R$)</th>
+                <th>Corretora</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for t in transacoes %}
+            <tr>
+                <td>{{ t.data_transacao|date:"d/m/Y" }}</td>
+                <td class="{% if t.tipo == 'C' %}compra{% else %}venda{% endif %}">
+                    {% if t.tipo == 'C' %}COMPRA{% else %}VENDA{% endif %}
+                </td>
+                <td><strong>{{ t.ativo.ticker }}</strong></td>
+                <td>{{ t.quantidade }}</td>
+                <td>R$ {{ t.preco_unitario }}</td>
+                <td>{{ t.corretora.nome }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align: center;">Nenhuma transação registrada ainda.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

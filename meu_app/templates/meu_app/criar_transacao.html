@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Nova Transação</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f8f9fa; }
+        .container { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-salvar { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+        .btn-voltar { display: inline-block; margin-bottom: 15px; padding: 10px 15px; background: #6c757d; color: white; text-decoration: none; border-radius: 4px; }
+        .alert { padding: 15px; margin-bottom: 20px; border-radius: 4px; }
+        .alert-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <a href="{% url 'carteira' %}" class="btn-voltar">← Voltar para Carteira</a>
+    <h2>Registrar Operação</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" action="">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="ativo">Ativo:</label>
+            <select name="ativo" id="ativo" required>
+                <option value="">Selecione o ativo...</option>
+                {% for ativo in ativos %}
+                    <option value="{{ ativo.id }}">{{ ativo.ticker }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="tipo">Tipo de Operação:</label>
+            <select name="tipo" id="tipo" required>
+                <option value="C">Compra</option>
+                <option value="V">Venda</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="corretora">Corretora:</label>
+            <select name="corretora" id="corretora" required>
+                <option value="">Selecione a corretora...</option>
+                {% for corretora in corretoras %}
+                    <option value="{{ corretora.id }}">{{ corretora.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="quantidade">Quantidade:</label>
+            <input type="number" step="0.0001" name="quantidade" id="quantidade" required placeholder="Ex: 100">
+        </div>
+
+        <div class="form-group">
+            <label for="preco_unitario">Preço Unitário (R$):</label>
+            <input type="number" step="0.01" name="preco_unitario" id="preco_unitario" required placeholder="Ex: 34.50">
+        </div>
+
+        <div class="form-group">
+            <label for="data_transacao">Data da Transação:</label>
+            <input type="date" name="data_transacao" id="data_transacao" required>
+        </div>
+
+        <button type="submit" class="btn-salvar">Salvar Operação</button>
+    </form>
+</div>
+</body>
+</html>
