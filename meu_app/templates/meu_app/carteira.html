@@ -75,7 +75,7 @@
                     <td><strong style="color: #fff;">{{ item.ativo.ticker }}</strong></td>
                     <td>{{ item.quantidade_total|floatformat:0 }}</td>
                     <td>R$ {{ item.preco_medio|floatformat:2 }}</td>
-                    <td>R$ {{ item.preco_atual|default:"-" }}</td>
+                    <td>R$ {{ item.preco_atual|floatformat:2|default:"-" }}</td>
                     <td><strong style="color: #34d399;">R$ {{ item.patrimonio_atual|floatformat:2 }}</strong></td>
                     
                     <td class="{% if item.rentabilidade > 0 %}lucro{% elif item.rentabilidade < 0 %}prejuizo{% else %}neutro{% endif %}">
