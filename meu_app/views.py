@@ -234,7 +234,7 @@ def transacao_nova(request):
 # ==========================================
 def transacoes_lista(request):
     transacoes = Transacao.objects.all().order_by('-data_transacao')
-    return render(request, 'meu_app/historico_transacoes.html', {'transacoes': transacoes})
+    return render(request, 'meu_app/historico_transacao.html', {'transacoes': transacoes})
 
 # ==========================================
 # Sincronização de Cotações com a API (Services)
