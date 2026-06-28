@@ -12,22 +12,30 @@
         h1 { color: #ffffff; }
         
         /* Formulário de busca Dark Mode */
-        .search-form { margin-bottom: 20px; padding: 15px; background: #252525; border-radius: 5px; border: 1px solid #333; }
+        .search-container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px; gap: 15px; }
+        .search-form { padding: 15px; background: #252525; border-radius: 5px; border: 1px solid #333; flex-grow: 1; }
         .search-form input[type="text"] { padding: 8px; width: 250px; border: 1px solid #444; border-radius: 4px; background: #121212; color: #fff; }
         .search-form button { padding: 8px 15px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
         .search-form button:hover { background: #0056b3; }
         
         /* Tabela Dark Mode */
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333;  }
         th { background-color: #2a2a2a; color: #ffffff; }
         tr:hover { background-color: #252525; }
         
-        /* Botões do topo */
-        .btn-novo { display: inline-block; float: right; padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; border: none; }
+        /* Botões do topo e utilitários */
+        .btn-novo { float: right; padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; border: none; }
         .btn-novo:hover { background: #218838; }
         .btn-extrato { background: #17a2b8; margin-right: 10px; }
         .btn-extrato:hover { background: #138496; }
+        .btn-atualizar { padding: 10px 15px; background: #6b21a8; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; display: inline-block; }
+        .btn-atualizar:hover { background: #581c87; }
+
+        /* Cores de Rentabilidade */
+        .lucro { color: #4ade80; font-weight: bold; }
+        .prejuizo { color: #f87171; font-weight: bold; }
+        .neutro { color: #9ca3af; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -37,41 +45,51 @@
     <a href="{% url 'transacoes_lista' %}" class="btn-novo btn-extrato">Ver Extrato</a>
     <h1>Resumo da Carteira</h1>
 
-    <div class="search-form">
-        <form method="GET" action="">
-            <label for="buscarTicker">Buscar Ativo:</label>
-            <input type="text" id="buscarTicker" name="ticker" placeholder="Ex: PETR4..." value="{{ request.GET.ticker }}">
-            <button type="submit">Pesquisar</button>
-            <a href="{% url 'carteira' %}" style="margin-left: 10px; color: #f87171; text-decoration: none;">Limpar</a>
-        </form>
+    <div class="search-container">
+        <div class="search-form">
+            <form method="GET" action="">
+                <label for="buscarTicker">Buscar Ativo:</label>
+                <input type="text" id="buscarTicker" name="ticker" placeholder="Ex: PETR4..." value="{{ request.GET.ticker }}">
+                <button type="submit">Pesquisar</button>
+                <a href="{% url 'carteira' %}" style="margin-left: 10px; color: #f87171; text-decoration: none;">Limpar</a>
+            </form>
+        </div>
+        <a href="{% url 'sincronizar_cotacoes' %}" class="btn-atualizar">🔄 Atualizar Cotações</a>
     </div>
 
-    <table id="tabelaCarteira">
-        <thead>
-            <tr>
-                <th>Ticker</th>
-                <th>Classe</th>
-                <th>Qtd Total Atual</th>
-                <th>Preço Médio</th>
-                <th>Patrimônio Investido</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in ativos_da_carteira %}
-            <tr>
-                <td><strong style="color: #fff;">{{ item.ticker }}</strong></td>
-                <td>{{ item.classe }}</td>
-                <td>{{ item.quantidade_total }}</td>
-                <td>R$ {{ item.preco_medio }}</td>
-                <td><strong style="color: #4ade80;">R$ {{ item.patrimonio }}</strong></td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5" style="text-align: center; color: #888;">Nenhum ativo encontrado na sua carteira.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    <div style="overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%;">
+        <table id="tabelaCarteira">
+            <thead>
+                <tr>
+                    <th>Ticker</th>
+                    <th>Qtd Total</th>
+                    <th>P. Médio</th>
+                    <th>Cotação Atual</th>
+                    <th>Patrimônio Atual</th>
+                    <th>Rentabilidade</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in dados_carteira %}
+                <tr>
+                    <td><strong style="color: #fff;">{{ item.ativo.ticker }}</strong></td>
+                    <td>{{ item.quantidade_total|floatformat:0 }}</td>
+                    <td>R$ {{ item.preco_medio|floatformat:2 }}</td>
+                    <td>R$ {{ item.preco_atual|default:"-" }}</td>
+                    <td><strong style="color: #34d399;">R$ {{ item.patrimonio_atual|floatformat:2 }}</strong></td>
+                    
+                    <td class="{% if item.rentabilidade > 0 %}lucro{% elif item.rentabilidade < 0 %}prejuizo{% else %}neutro{% endif %}">
+                        {{ item.rentabilidade|floatformat:2 }}%
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; color: #888;">Nenhum ativo encontrado na sua carteira.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 </body>

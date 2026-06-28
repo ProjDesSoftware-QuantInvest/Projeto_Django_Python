@@ -66,41 +66,39 @@ class Ativo(models.Model):
         on_delete=models.PROTECT,
         related_name='ativos'
     )
-
+   
+    preco_atual = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    data_ultima_atualizacao = models.DateTimeField(null=True, blank=True)
     def __str__(self):
         return self.ticker
 
 
 class Transacao(models.Model):
-    # Opções para limitar o campo 'tipo' no banco e no painel do Django
     TIPO_CHOICES = [
         ('C', 'Compra'),
         ('V', 'Venda'),
     ]
 
-    # Relacionamentos Foreign Key com Ativo e Corretora
     ativo = models.ForeignKey(
         Ativo,
         on_delete=models.CASCADE,
         related_name='transacoes'
     )
+    
+    # ALTERADO AQUI: Mudança de CASCADE para SET_NULL + permissão de nulos
     corretora = models.ForeignKey(
         Corretora,
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,  # <--- Evita que o histórico seja deletado
+        null=True,                  # <--- Permite valor NULL no banco de dados
+        blank=True,                 # <--- Permite deixar em branco nos formulários
         related_name='transacoes'
     )
 
     tipo = models.CharField(max_length=1, choices=TIPO_CHOICES)
-
-    # Quantidade configurada para aceitar até 4 casas decimais (ex: criptoativos ou frações)
     quantidade = models.DecimalField(max_digits=18, decimal_places=4)
-
-    # Preço unitário configurado para aceitar 2 casas decimais
     preco_unitario = models.DecimalField(max_digits=12, decimal_places=2)
-
     data_transacao = models.DateTimeField()
-
+    
     def __str__(self):
-        # Exibe uma string limpa identificando a transação, ex: "Compra de WEGE3 - 10.0000 un"
         tipo_extenso = "Compra" if self.tipo == 'C' else "Venda"
         return f"{tipo_extenso} de {self.ativo.ticker} - {self.quantidade} un"
