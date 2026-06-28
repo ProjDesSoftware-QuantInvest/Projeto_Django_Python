@@ -1,0 +1,3 @@
+Essa aplicação Web , que utiliza Django-Python, atua como um simulador de rastreio de investimentos, em que o usuário pode realizar compra e venda de ações, via internet,
+com todos os dados, devidamente registrados em um banco, onde podem ser consultadas as transações realizadas, quantidade total de ativo, preço e rentabilidade, o investidor deve 
+escolher uma corretora, para possibilitar a realização dessas negociações.
