@@ -122,12 +122,19 @@ def concluir_tarefa(request, id):
     tarefa.save()
 
     return redirect('listar_tarefas')
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.utils import timezone
+from decimal import Decimal
+from .models import Ativo, Transacao, Corretora  # Garanta que Corretora esteja importada se aplicável
+from .services import buscar_preco_atual
+
 # ==========================================
-# ISSUE #8: Consolidação de Saldo e Preço Médio
+# ISSUE #8 & API: Consolidação de Saldo, Preço Médio e Cotação Real-time
 # ==========================================
 def carteira(request):
     ativos = Ativo.objects.all()
-    ativos_da_carteira = []
+    dados_carteira = []
     
     # Captura o que o usuário digitou na barra de busca (RF07)
     ticker_busca = request.GET.get('ticker', '').upper()
@@ -145,7 +152,6 @@ def carteira(request):
         # Algoritmo de Preço Médio e Saldo
         for t in transacoes:
             if t.tipo == 'C':  # Compra
-                # Calcula o valor total do que eu já tinha + o que estou comprando agora
                 valor_patrimonio_atual = qtd_atual * preco_medio
                 valor_nova_compra = t.quantidade * t.preco_unitario
                 
@@ -156,28 +162,39 @@ def carteira(request):
                     preco_medio = (valor_patrimonio_atual + valor_nova_compra) / qtd_atual
                     
             elif t.tipo == 'V':  # Venda
-                # Venda reduz a quantidade, mas NÃO altera o preço médio
                 qtd_atual -= t.quantidade
 
         # Filtrar apenas ativos com saldo maior que zero
         if qtd_atual > 0:
-            ativos_da_carteira.append({
-                'ticker': ativo.ticker,
+            # Integração com os novos campos da API (Isolados via model/services)
+            # Evita quebras se a API ainda não tiver rodado nenhuma vez
+            preco_atual = ativo.preco_atual if ativo.preco_atual is not None else preco_medio
+            
+            patrimonio_atual = qtd_atual * preco_atual
+            
+            # Cálculo da Rentabilidade % = ((Preço Atual - Preço Médio) / Preço Médio) * 100
+            if preco_medio > 0:
+                rentabilidade = ((preco_atual - preco_medio) / preco_medio) * 100
+            else:
+                rentabilidade = Decimal('0.0')
+
+            dados_carteira.append({
+                'ativo': ativo,
                 'classe': ativo.classe.nome if ativo.classe else '-',
                 'quantidade_total': round(qtd_atual, 4),
                 'preco_medio': round(preco_medio, 2),
-                'patrimonio': round(qtd_atual * preco_medio, 2)
+                'preco_atual': preco_atual,
+                'patrimonio_atual': round(patrimonio_atual, 2),
+                'rentabilidade': float(rentabilidade),  # Forçado como float para leitura segura no template
             })
 
-    # ATUALIZADO: Caminho apontando para a pasta meu_app
-    return render(request, 'meu_app/carteira.html', {'ativos_da_carteira': ativos_da_carteira})
+    return render(request, 'meu_app/carteira.html', {'dados_carteira': dados_carteira})
 
 # ==========================================
 # ISSUE #9: Inserção com Trava de Segurança
 # ==========================================
 def transacao_nova(request):
     if request.method == 'POST':
-        # Pega os dados enviados pelo formulário HTML
         ativo_id = request.POST.get('ativo')
         corretora_id = request.POST.get('corretora')
         tipo = request.POST.get('tipo')
@@ -187,20 +204,18 @@ def transacao_nova(request):
 
         ativo = get_object_or_404(Ativo, id=ativo_id)
         
-        # Validação - Impede Venda a Descoberto
+        # Validação RN05 - Impede Venda a Descoberto
         if tipo == 'V':
-            # Calcula o saldo atual
             qtd_atual = sum(t.quantidade if t.tipo == 'C' else -t.quantidade for t in ativo.transacoes.all())
             
             if quantidade > qtd_atual:
-                # Dispara a mensagem de erro e aborta o salvamento
                 messages.error(request, f'Erro: Você não tem saldo suficiente de {ativo.ticker}. Saldo atual: {qtd_atual}')
                 return redirect('transacao_nova')
 
         # Se passou na validação, salva no banco
         Transacao.objects.create(
             ativo_id=ativo_id,
-            corretora_id=corretora_id,
+            corretora_id=corretora_id if corretora_id else None,  # Permite nulo caso venha vazio
             tipo=tipo,
             quantidade=quantidade,
             preco_unitario=preco,
@@ -208,44 +223,22 @@ def transacao_nova(request):
         )
         
         messages.success(request, 'Transação registrada com sucesso!')
-        # Após salvar, manda o usuário de volta para a carteira
         return redirect('carteira') 
 
-    # Se for um GET carrega o formulário vazio
     ativos = Ativo.objects.all()
     corretoras = Corretora.objects.all()
-    
-    # ATUALIZADO: Caminho apontando para a pasta meu_app
     return render(request, 'meu_app/criar_transacao.html', {'ativos': ativos, 'corretoras': corretoras})
 
 # ==========================================
 # ISSUE #11: Extrato de Transações (Histórico)
 # ==========================================
 def transacoes_lista(request):
-    # Busca todas do banco, ordenando da mais nova para a mais antiga (sinal de menos no data_transacao)
     transacoes = Transacao.objects.all().order_by('-data_transacao')
-    
-    # ATUALIZADO: Caminho apontando para a pasta meu_app
     return render(request, 'meu_app/historico_transacoes.html', {'transacoes': transacoes})
 
 # ==========================================
-# Funções Auxiliares (Home e Excluir)
+# Sincronização de Cotações com a API (Services)
 # ==========================================
-def home(request):
-    # ATUALIZADO: Caminho apontando para a pasta meu_app
-    return render(request, 'meu_app/home.html')
-
-def transacao_excluir(request, id):
-    # Função placeholder para não dar erro na URL antes de implementarmos a exclusão
-    pass
-
-
-# meu_app/views.py
-from django.shortcuts import redirect
-from django.utils import timezone
-from .models import Ativo
-from .services import buscar_preco_atual
-
 def sincronizar_cotacoes(request):
     ativos = Ativo.objects.all()
     
@@ -256,33 +249,14 @@ def sincronizar_cotacoes(request):
             ativo.data_ultima_atualizacao = timezone.now()
             ativo.save()
             
-    return redirect('nome_da_sua_view_da_carteira')
+    # Redireciona de volta para a view principal da carteira atualizada
+    return redirect('carteira')
 
+# ==========================================
+# Funções Auxiliares (Home e Excluir)
+# ==========================================
+def home(request):
+    return render(request, 'meu_app/home.html')
 
-
-
-# Exemplo de trecho dentro da sua view principal da carteira
-def ver_carteira(request):
-    ativos = Ativo.objects.all()
-    dados_carteira = []
-    
-    for ativo in ativos:
-        # Evita quebras se a API ainda não tiver rodado nenhuma vez
-        preco_atual = ativo.preco_atual if ativo.preco_atual else ativo.preco_medio
-        
-        patrimonio_atual = ativo.quantidade * preco_atual
-        patrimonio_compra = ativo.quantidade * ativo.preco_medio
-        
-        # Cálculo da Rentabilidade % = ((Preço Atual - Preço Médio) / Preço Médio) * 100
-        if ativo.preco_medio > 0:
-            rentabilidade = ((preco_atual - ativo.preco_medio) / ativo.preco_medio) * 100
-        else:
-            rentabilidade = 0
-
-        dados_carteira.append({
-            'ativo': ativo,
-            'patrimonio_atual': patrimonio_atual,
-            'rentabilidade': rentabilidade,
-        })
-        
-    return render(request, 'carteira.html', {'dados_carteira': dados_carteira})
+def transacao_excluir(request, id):
+    pass
