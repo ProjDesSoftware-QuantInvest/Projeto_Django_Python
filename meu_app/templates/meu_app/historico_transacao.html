@@ -50,8 +50,8 @@
                     </span>
                 </td>
                 <td><strong style="color: #fff;">{{ t.ativo.ticker }}</strong></td>
-                <td>{{ t.quantidade }}</td>
-                <td>R$ {{ t.preco_unitario }}</td>
+                <td>{{ t.quantidade|floatformat:0 }}</td>
+                <td>R$ {{ t.preco_unitario|floatformat:2 }}</td>
                 <td>{{ t.corretora.nome }}</td>
             </tr>
             {% empty %}
