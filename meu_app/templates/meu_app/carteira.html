@@ -73,7 +73,7 @@
                 {% for item in dados_carteira %}
                 <tr>
                     <td><strong style="color: #fff;">{{ item.ativo.ticker }}</strong></td>
-                    <td>{{ item.quantidade_total }}</td>
+                    <td>{{ item.quantidade_total|floatformat:0 }}</td>
                     <td>R$ {{ item.preco_medio|floatformat:2 }}</td>
                     <td>R$ {{ item.preco_atual|default:"-" }}</td>
                     <td><strong style="color: #34d399;">R$ {{ item.patrimonio_atual|floatformat:2 }}</strong></td>
