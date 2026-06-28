@@ -24,7 +24,7 @@
         tr:hover { background-color: #252525; }
         
         /* Botões do topo */
-        .btn-novo { display: inline-block; float: right; padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; border: none; }
+        .btn-novo { float: right; padding: 10px 15px; background: #28a745; color: white; text-decoration: none; border-radius: 4px; border: none; }
         .btn-novo:hover { background: #218838; }
         .btn-extrato { background: #17a2b8; margin-right: 10px; }
         .btn-extrato:hover { background: #138496; }
@@ -43,6 +43,35 @@
             <input type="text" id="buscarTicker" name="ticker" placeholder="Ex: PETR4..." value="{{ request.GET.ticker }}">
             <button type="submit">Pesquisar</button>
             <a href="{% url 'carteira' %}" style="margin-left: 10px; color: #f87171; text-decoration: none;">Limpar</a>
+            <a href="{% url 'sincronizar_cotacoes' %}" class="btn-atualizar">
+    🔄 Atualizar Cotações
+</a>
+<table>
+    <thead>
+        <tr>
+            <th>Ticker</th>
+            <th>Qtd</th>
+            <th>P.Médio</th>
+            <th>Cotação Atual</th>
+            <th>Patrimônio Atual</th>
+            <th>Rentabilidade</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in dados_carteira %}
+        <tr>
+            <td>{{ item.ativo.ticker }}</td>
+            <td>{{ item.ativo.quantidade }}</td>
+            <td>R$ {{ item.ativo.preco_medio }}</td>
+            <td>R$ {{ item.ativo.preco_atual|default:"-" }}</td>
+            <td>R$ {{ item.patrimonio_atual|floatformat:2 }}</td>
+           
+</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
         </form>
     </div>
 

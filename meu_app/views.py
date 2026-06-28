@@ -3,6 +3,125 @@ from django.contrib import messages
 from decimal import Decimal
 from .models import Ativo, Transacao, Corretora
 
+from django.shortcuts import render, redirect, get_object_or_404
+
+from .models import Tarefa, Categoria
+from datetime import datetime
+
+def home(request):
+    return render(request, 'meu_app/home.html', {'hoje': datetime.today()})
+
+
+
+
+
+def listar_tarefas(request):
+    tarefas = Tarefa.objects.all().order_by('-data_criacao')
+    busca = request.GET.get('busca')
+    status = request.GET.get('status')
+    ordem = request.GET.get('ordem')
+
+    if busca:
+        tarefas = tarefas.filter(titulo__icontains=busca)
+
+    if status == 'pendentes':
+        tarefas = tarefas.filter(concluida=False)
+    elif status == 'concluidas':
+        tarefas = tarefas.filter(concluida=True)
+
+    if ordem == 'antigas':
+        tarefas = tarefas.order_by('data_criacao')
+    elif ordem == 'titulo_az':
+        tarefas = tarefas.order_by('titulo')
+    elif ordem == 'titulo_za':
+        tarefas = tarefas.order_by('-titulo')
+    else:
+        tarefas = tarefas.order_by('-data_criacao')
+    return render(
+        request,
+        'meu_app/listar_tarefas.html',
+        {'tarefas': tarefas}
+    )
+
+
+def criar_tarefa(request):
+    if request.method == 'POST':
+        titulo = request.POST.get('titulo')
+        descricao = request.POST.get('descricao')
+        concluida = request.POST.get('concluida') == 'on'
+
+        categoria_id = request.POST.get('categoria')
+
+        categoria = None
+
+        if categoria_id:
+            categoria = get_object_or_404(Categoria, id=categoria_id)
+
+        Tarefa.objects.create(
+            titulo=titulo,
+            descricao=descricao,
+            concluida=concluida,
+            categoria=categoria
+        )
+
+        return redirect('listar_tarefas')
+
+    return render(
+        request,
+        'meu_app/criar_tarefa.html',
+        {'categorias': categoria}
+    )
+
+
+def detalhe_tarefa(request, id):
+    tarefa = get_object_or_404(Tarefa, id=id)
+
+    return render(
+        request,
+        'meu_app/detalhe_tarefa.html',
+        {'tarefa': tarefa}
+    )
+
+
+
+def editar_tarefa(request, id):
+    tarefa = get_object_or_404(Tarefa, id=id)
+
+    if request.method == 'POST':
+        tarefa.titulo = request.POST.get('titulo')
+        tarefa.descricao = request.POST.get('descricao')
+        tarefa.concluida = request.POST.get('concluida') == 'on'
+        tarefa.save()
+
+        return redirect('listar_tarefas')
+
+    return render(
+        request,
+        'meu_app/editar_tarefa.html',
+        {'tarefa': tarefa}
+    )
+
+
+
+def excluir_tarefa(request, id):
+    tarefa = get_object_or_404(Tarefa, id=id)
+
+    if request.method == 'POST':
+        tarefa.delete()
+        return redirect('listar_tarefas')
+
+    return render(
+        request,
+        'meu_app/confirmar_exclusao.html',
+        {'tarefa': tarefa}
+    )
+
+def concluir_tarefa(request, id):
+    tarefa = get_object_or_404(Tarefa, id=id)
+    tarefa.concluida = True
+    tarefa.save()
+
+    return redirect('listar_tarefas')
 # ==========================================
 # ISSUE #8: Consolidação de Saldo e Preço Médio
 # ==========================================
@@ -119,3 +238,51 @@ def home(request):
 def transacao_excluir(request, id):
     # Função placeholder para não dar erro na URL antes de implementarmos a exclusão
     pass
+
+
+# meu_app/views.py
+from django.shortcuts import redirect
+from django.utils import timezone
+from .models import Ativo
+from .services import buscar_preco_atual
+
+def sincronizar_cotacoes(request):
+    ativos = Ativo.objects.all()
+    
+    for ativo in ativos:
+        novo_preco = buscar_preco_atual(ativo.ticker)
+        if novo_preco:
+            ativo.preco_atual = novo_preco
+            ativo.data_ultima_atualizacao = timezone.now()
+            ativo.save()
+            
+    return redirect('nome_da_sua_view_da_carteira')
+
+
+
+
+# Exemplo de trecho dentro da sua view principal da carteira
+def ver_carteira(request):
+    ativos = Ativo.objects.all()
+    dados_carteira = []
+    
+    for ativo in ativos:
+        # Evita quebras se a API ainda não tiver rodado nenhuma vez
+        preco_atual = ativo.preco_atual if ativo.preco_atual else ativo.preco_medio
+        
+        patrimonio_atual = ativo.quantidade * preco_atual
+        patrimonio_compra = ativo.quantidade * ativo.preco_medio
+        
+        # Cálculo da Rentabilidade % = ((Preço Atual - Preço Médio) / Preço Médio) * 100
+        if ativo.preco_medio > 0:
+            rentabilidade = ((preco_atual - ativo.preco_medio) / ativo.preco_medio) * 100
+        else:
+            rentabilidade = 0
+
+        dados_carteira.append({
+            'ativo': ativo,
+            'patrimonio_atual': patrimonio_atual,
+            'rentabilidade': rentabilidade,
+        })
+        
+    return render(request, 'carteira.html', {'dados_carteira': dados_carteira})

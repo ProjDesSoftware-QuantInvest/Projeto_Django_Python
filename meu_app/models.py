@@ -66,7 +66,9 @@ class Ativo(models.Model):
         on_delete=models.PROTECT,
         related_name='ativos'
     )
-
+   
+    preco_atual = models.DecimalField(max_digits=10, decimal_places=4, null=True, blank=True)
+    data_ultima_atualizacao = models.DateTimeField(null=True, blank=True)
     def __str__(self):
         return self.ticker
 
@@ -99,7 +101,7 @@ class Transacao(models.Model):
     preco_unitario = models.DecimalField(max_digits=12, decimal_places=2)
 
     data_transacao = models.DateTimeField()
-
+    
     def __str__(self):
         # Exibe uma string limpa identificando a transação, ex: "Compra de WEGE3 - 10.0000 un"
         tipo_extenso = "Compra" if self.tipo == 'C' else "Venda"
