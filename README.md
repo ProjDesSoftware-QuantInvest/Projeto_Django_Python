@@ -3,16 +3,16 @@ Essa aplicação Web , que utiliza Django-Python, atua como um simulador de rast
 AUTORES:
 
 
-Adriel Barbosa de Freitas
-Caio César Cabral Cataldo
-Caique Eduardo de Oliveira Alves
-Cauã Domingues De Angelis
-Daniel Macedo Gomes
-Fábio Cezar Paiva Paixão
-Gabriel Aguiar de Veras da Silva
-Ilauan Fontes Leal
-João Vitor Tavares Flores
-Jorge Lucas zuim
-Lucas Spinelli de Almeida
-Marlon Alberto Silva do Nascimento
-Rodrigo Heringer Alvim
+Adriel Barbosa de Freitas;
+Caio César Cabral Cataldo;
+Caique Eduardo de Oliveira Alves;
+Cauã Domingues De Angelis;
+Daniel Macedo Gomes;
+Fábio Cezar Paiva Paixão;
+Gabriel Aguiar de Veras da Silva;
+Ilauan Fontes Leal;
+João Vitor Tavares Flores;
+Jorge Lucas zuim;
+Lucas Spinelli de Almeida;
+Marlon Alberto Silva do Nascimento;
+Rodrigo Heringer Alvim;
