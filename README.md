@@ -1,1 +1,17 @@
 Essa aplicação Web , que utiliza Django-Python, atua como um simulador de rastreio de investimentos, integrado com a API yfinance, em que o usuário pode realizar compra e venda de ações, via internet, com todos os dados, devidamente registrados em um banco, onde podem ser consultadas as transações realizadas, quantidade total de ativo, preço e rentabilidade, o investidor deve escolher uma corretora, para possibilitar a realização dessas negociações.
+
+AUTORES:
+
+Adriel Barbosa de Freitas
+Caio César Cabral Cataldo
+Caique Eduardo de Oliveira Alves
+Cauã Domingues De Angelis
+Daniel Macedo Gomes
+Fábio Cezar Paiva Paixão
+Gabriel Aguiar de Veras da Silva
+Ilauan Fontes Leal
+João Vitor Tavares Flores
+Jorge Lucas zuim
+Lucas Spinelli de Almeida
+Marlon Alberto Silva do Nascimento
+Rodrigo Heringer Alvim
