@@ -2,6 +2,7 @@ Essa aplicação Web , que utiliza Django-Python, atua como um simulador de rast
 
 AUTORES:
 
+
 Adriel Barbosa de Freitas
 Caio César Cabral Cataldo
 Caique Eduardo de Oliveira Alves
